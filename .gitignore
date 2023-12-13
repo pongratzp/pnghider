@@ -1,0 +1,15 @@
+# Rust
+debug/
+target/
+
+**/*.rs.bk
+
+*.pdb
+
+# VSCode
+.vscode/*
+.history/
+*.vsix
+
+# pnghider
+input/
