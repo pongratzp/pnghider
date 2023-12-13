@@ -1,0 +1,22 @@
+[package]
+name = "pnghider"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+aes-gcm = "0.10.3"
+argon2 = "0.5.2"
+clap = { version = "4.4.10", features = ["derive"] }
+crc = "3.0.1"
+thiserror = "1.0.50"
+tokio = "1.35.0"
+
+[[bin]]
+name = "encoder"
+path = "src/encode.rs"
+
+[[bin]]
+name = "decoder"
+path = "src/decode.rs"
