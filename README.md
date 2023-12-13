@@ -8,6 +8,6 @@ Please note that since this is a learning project, code will not be perfect and 
     cargo build --release
 
 
-    ./encoder \<password\> \<infile\> \<payload\> \<outfile\>
+    ./encoder <password> <infile> <payload> <outfile>
 
-    ./decoder \<password\> \<encrypted png\> \<payload outfile\>
+    ./decoder <password> <encrypted png> <payload outfile>
