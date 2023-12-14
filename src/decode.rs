@@ -1,11 +1,9 @@
-use crate::prelude::*;
-
 mod error;
 mod prelude;
 
 mod utils;
 
-use crate::utils::common::{find_sequence, Pngchunk};
+use crate::utils::common::{check_png, get_chunk_start, Pngchunk};
 
 use aes_gcm::{
     aead::{Aead, KeyInit},
@@ -38,7 +36,7 @@ impl fmt::Display for Cli {
     }
 }
 
-fn main() -> Result<()> {
+fn main() -> anyhow::Result<()> {
     let args = Cli::parse();
 
     println!("CLI: {}", args);
@@ -49,25 +47,9 @@ fn main() -> Result<()> {
 
     reader.read_to_end(&mut buffer)?;
 
-    match find_sequence(&buffer, &utils::common::PNG_MAGICBYTES) {
-        Some(0) => (),
-        Some(_) => {
-            Error::Generic(f!("Magic bytes in weird position"));
-        }
-        None => {
-            Error::Generic(f!("Could not read magic bytes"));
-        }
-    }
+    check_png(&buffer)?;
 
-    let dstart = find_sequence(&buffer, &utils::common::PNG_CUSTOMCHUNK);
-    match dstart {
-        Some(n) => println!("Encoded data starts at byte {:?}", n),
-        None => {
-            Error::Generic(f!("Could not read encoded data start bytes"));
-        }
-    }
-
-    let dstart = dstart.unwrap();
+    let dstart = get_chunk_start(&buffer, &utils::common::PNG_CUSTOMCHUNK)?;
 
     let mut encoded_chunk: Pngchunk = Default::default();
 

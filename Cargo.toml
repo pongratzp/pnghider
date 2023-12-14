@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 aes-gcm = "0.10.3"
+anyhow = "1.0.75"
 argon2 = "0.5.2"
 clap = { version = "4.4.10", features = ["derive"] }
 crc = "3.0.1"

@@ -5,7 +5,7 @@ mod prelude;
 
 mod utils;
 
-use crate::utils::common::{find_sequence, Pngchunk};
+use crate::utils::common::{check_png, get_chunk_start, Pngchunk};
 
 use aes_gcm::{
     aead::{Aead, AeadCore, KeyInit},
@@ -41,7 +41,7 @@ impl fmt::Display for Cli {
     }
 }
 
-fn main() -> Result<()> {
+fn main() -> anyhow::Result<()> {
     let args = Cli::parse();
 
     println!("CLI: {}", args);
@@ -52,26 +52,11 @@ fn main() -> Result<()> {
 
     reader.read_to_end(&mut buffer)?;
 
-    match find_sequence(&buffer, &utils::common::PNG_MAGICBYTES) {
-        Some(0) => (),
-        Some(_) => {
-            Error::Generic(f!("Magic bytes in weird position"));
-        }
-        None => {
-            Error::Generic(f!("Could not read magic bytes"));
-        }
-    }
+    check_png(&buffer)?;
 
-    let dstart = find_sequence(&buffer, &utils::common::PNG_IEND);
-    match dstart {
-        Some(n) => println!("Image END tag starts at byte {:?}", n),
-        None => {
-            Error::Generic(f!("Could not read IEND bytes"));
-        }
-    }
+    let dstart = get_chunk_start(&buffer, &utils::common::PNG_IEND)?;
 
     let mut endchunk: Pngchunk = Default::default();
-    let dstart = dstart.unwrap();
     endchunk.load_from_slice(buffer[dstart - utils::common::CHUNK_LEN_SIZE..].to_vec());
 
     let dlen = endchunk.chunk_len();

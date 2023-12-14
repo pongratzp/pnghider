@@ -1,4 +1,5 @@
 #![allow(dead_code, unused_variables)]
+use crate::prelude::*;
 
 use crc::CRC_32_ISO_HDLC;
 
@@ -104,4 +105,20 @@ where
     haystack
         .windows(needle.len())
         .position(|window| window == needle)
+}
+
+pub fn check_png(val: &Vec<u8>) -> Result<()> {
+    match find_sequence(&val, &PNG_MAGICBYTES) {
+        Some(0) => Ok(()),
+        Some(_) => Err(Error::NotPNG(f!("Magic bytes in weird position"))),
+        None => Err(Error::NotPNG(f!("Could not read magic bytes"))),
+    }
+}
+
+pub fn get_chunk_start(buffer: &Vec<u8>, chunk_header: &[u8; 4]) -> Result<usize> {
+    let dstart = find_sequence(&buffer, chunk_header);
+    match dstart {
+        Some(n) => Ok(dstart.unwrap()),
+        None => Err(Error::ChunkNotFound(f!("{:?}", chunk_header))),
+    }
 }
