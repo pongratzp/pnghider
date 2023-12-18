@@ -3,10 +3,11 @@ Encryption is done using AES and Argon2 with a random salt as KDF.
 
 Please note that since this is a learning project, code will not be perfect and expect bugs!
 
-# Usage
+# Build
 
     cargo build --release
 
+# Usage
 
     ./encoder <password> <infile> <payload> <outfile>
 
