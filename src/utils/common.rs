@@ -122,3 +122,43 @@ pub fn get_chunk_start(buffer: &Vec<u8>, chunk_header: &[u8; 4]) -> Result<usize
         None => Err(Error::ChunkNotFound(f!("{:?}", chunk_header))),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn find_sequence_nothing() {
+        assert_eq!(None, find_sequence(&[1, 2, 3, 4], &[5]));
+    }
+
+    #[test]
+    fn find_sequence_start() {
+        assert_eq!(0, find_sequence(&[1, 2, 3, 4], &[1]).unwrap());
+    }
+
+    #[test]
+    fn find_sequence_middle() {
+        assert_eq!(2, find_sequence(&[1, 2, 3, 4], &[3]).unwrap());
+    }
+
+    #[test]
+    fn find_sequence_end() {
+        assert_eq!(3, find_sequence(&[1, 2, 3, 4], &[4]).unwrap());
+    }
+
+    #[test]
+    fn find_sequence_multiple_nothing() {
+        assert_eq!(None, find_sequence(&[1, 2, 3, 4], &[2, 4]));
+    }
+
+    #[test]
+    fn find_sequence_multiple() {
+        assert_eq!(1, find_sequence(&[1, 2, 3, 4], &[2, 3]).unwrap());
+    }
+
+    #[test]
+    fn find_sequence_full() {
+        assert_eq!(0, find_sequence(&[1, 2, 3, 4], &[1, 2, 3, 4]).unwrap());
+    }
+}
