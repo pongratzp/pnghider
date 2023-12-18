@@ -1,4 +1,3 @@
-#![allow(dead_code, unused_variables)]
 use crate::prelude::*;
 
 use crc::CRC_32_ISO_HDLC;
@@ -118,7 +117,7 @@ pub fn check_png(val: &Vec<u8>) -> Result<()> {
 pub fn get_chunk_start(buffer: &Vec<u8>, chunk_header: &[u8; 4]) -> Result<usize> {
     let dstart = find_sequence(&buffer, chunk_header);
     match dstart {
-        Some(n) => Ok(dstart.unwrap()),
+        Some(_) => Ok(dstart.unwrap()),
         None => Err(Error::ChunkNotFound(f!("{:?}", chunk_header))),
     }
 }

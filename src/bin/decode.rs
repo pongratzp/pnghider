@@ -1,9 +1,6 @@
-mod error;
-mod prelude;
-
-mod utils;
-
-use crate::utils::common::{check_png, get_chunk_start, Pngchunk};
+use pnghider::utils::common::{
+    check_png, get_chunk_start, Pngchunk, CHUNK_LEN_SIZE, NONCE_LEN, PNG_CUSTOMCHUNK, SALT_LEN,
+};
 
 use aes_gcm::{
     aead::{Aead, KeyInit},
@@ -49,19 +46,18 @@ fn main() -> anyhow::Result<()> {
 
     check_png(&buffer)?;
 
-    let dstart = get_chunk_start(&buffer, &utils::common::PNG_CUSTOMCHUNK)?;
+    let dstart = get_chunk_start(&buffer, &PNG_CUSTOMCHUNK)?;
 
     let mut encoded_chunk: Pngchunk = Default::default();
 
-    encoded_chunk.load_from_slice(buffer[dstart - utils::common::CHUNK_LEN_SIZE..].to_vec());
+    encoded_chunk.load_from_slice(buffer[dstart - CHUNK_LEN_SIZE..].to_vec());
     let dlen = encoded_chunk.chunk_len();
 
     println!("Got {:?} bytes of encoded data!", dlen);
 
     let encdata = encoded_chunk.content();
-    let saltbytes =
-        &encdata[utils::common::NONCE_LEN..utils::common::NONCE_LEN + utils::common::SALT_LEN];
-    let nonce = Nonce::from_slice(&encdata[0..utils::common::NONCE_LEN]);
+    let saltbytes = &encdata[NONCE_LEN..NONCE_LEN + SALT_LEN];
+    let nonce = Nonce::from_slice(&encdata[0..NONCE_LEN]);
 
     let mut aes_key = [0u8; 32];
 
@@ -72,10 +68,7 @@ fn main() -> anyhow::Result<()> {
     println!("salt: {:?}", saltbytes);
 
     let plaintext = cipher
-        .decrypt(
-            &nonce,
-            encdata[utils::common::NONCE_LEN + utils::common::SALT_LEN..].as_ref(),
-        )
+        .decrypt(&nonce, encdata[NONCE_LEN + SALT_LEN..].as_ref())
         .map_err(|err| {
             std::io::Error::new(
                 std::io::ErrorKind::Other,

@@ -1,6 +1,6 @@
 [package]
 name = "pnghider"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -16,8 +16,8 @@ tokio = "1.35.0"
 
 [[bin]]
 name = "encoder"
-path = "src/encode.rs"
+path = "src/bin/encode.rs"
 
 [[bin]]
 name = "decoder"
-path = "src/decode.rs"
+path = "src/bin/decode.rs"

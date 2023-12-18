@@ -1,11 +1,9 @@
-use crate::prelude::*;
+use pnghider::prelude::*;
 
-mod error;
-mod prelude;
-
-mod utils;
-
-use crate::utils::common::{check_png, get_chunk_start, Pngchunk};
+use pnghider::utils::common::{
+    check_png, get_chunk_start, Pngchunk, CHUNK_CRC_SIZE, CHUNK_HEADER_SIZE, CHUNK_LEN_SIZE,
+    PNG_CUSTOMCHUNK, PNG_IEND, SALT_LEN,
+};
 
 use aes_gcm::{
     aead::{Aead, AeadCore, KeyInit},
@@ -54,10 +52,10 @@ fn main() -> anyhow::Result<()> {
 
     check_png(&buffer)?;
 
-    let dstart = get_chunk_start(&buffer, &utils::common::PNG_IEND)?;
+    let dstart = get_chunk_start(&buffer, &PNG_IEND)?;
 
     let mut endchunk: Pngchunk = Default::default();
-    endchunk.load_from_slice(buffer[dstart - utils::common::CHUNK_LEN_SIZE..].to_vec());
+    endchunk.load_from_slice(buffer[dstart - CHUNK_LEN_SIZE..].to_vec());
 
     let dlen = endchunk.chunk_len();
 
@@ -71,7 +69,7 @@ fn main() -> anyhow::Result<()> {
 
     let mut aes_key = [0u8; 32];
     let binding = SaltString::generate(&mut OsRng);
-    let mut saltbytes: [u8; utils::common::SALT_LEN] = [0u8; utils::common::SALT_LEN];
+    let mut saltbytes: [u8; SALT_LEN] = [0u8; SALT_LEN];
     let _ = binding.decode_b64(&mut saltbytes);
 
     let _ = Argon2::default().hash_password_into(args.key.as_bytes(), &saltbytes, &mut aes_key);
@@ -89,9 +87,9 @@ fn main() -> anyhow::Result<()> {
     ciphertext.splice(0..0, nonce);
 
     let mut newchunk: Pngchunk = Default::default();
-    newchunk.create_from_content(utils::common::PNG_CUSTOMCHUNK, ciphertext);
+    newchunk.create_from_content(PNG_CUSTOMCHUNK, ciphertext);
 
-    let i = dstart + utils::common::CHUNK_HEADER_SIZE + dlen + utils::common::CHUNK_CRC_SIZE;
+    let i = dstart + CHUNK_HEADER_SIZE + dlen + CHUNK_CRC_SIZE;
     buffer.splice(i..i, newchunk.flatten());
 
     let endtag: [u8; 12] = [0, 0, 0, 0, 73, 69, 78, 68, 174, 66, 96, 130];
